@@ -1,4 +1,4 @@
-# Telegram MicroSaaS - Automação de Mensagens
+# Telegram Micro Services - Automação de Mensagens
 
 Este é um projeto de automação para encaminhar mensagens entre grupos e canais do Telegram, construído com uma arquitetura moderna de microsserviços.
 
@@ -12,7 +12,7 @@ O projeto é dividido em duas partes principais:
 ## 🏗️ Estrutura do Projeto
 
 ```
-telegram-microsaas/
+telegram-micro-services/
 ├── backend/                # Aplicação Backend (FastAPI)
 │   ├── app/
 │   ├── sessions/
