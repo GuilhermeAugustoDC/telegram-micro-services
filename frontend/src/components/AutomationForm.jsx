@@ -4,7 +4,7 @@ const AutomationForm = ({ onAutomationCreated }) => {
 	const [automationName, setAutomationName] = useState('');
 	const [sourceChatId, setSourceChatId] = useState('');
 	const [destinationChatIds, setDestinationChatIds] = useState('');
-	const [sessionId, setSessionId] = useState(''); // Novo estado
+	const [sessionId, setSessionId] = useState('');
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();

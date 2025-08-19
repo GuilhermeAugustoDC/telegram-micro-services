@@ -8,11 +8,14 @@ from app.api.dependencies import get_db
 
 router = APIRouter()
 
+
+"""Cria uma nova automação"""
+
+
 @router.post("/automations/", response_model=Automation)
 async def create_automation(
     automation: AutomationCreate, db: Session = Depends(get_db)
 ):
-    """Cria uma nova automação"""
     db_session = (
         db.query(UserSession).filter(UserSession.id == automation.session_id).first()
     )
@@ -40,18 +43,24 @@ async def create_automation(
     return db_automation
 
 
+"""Lista todas as automações"""
+
+
 @router.get("/automations/", response_model=List[Automation])
 async def list_automations(
     skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
-    """Lista todas as automações"""
+
     automations = db.query(AutomationModel).offset(skip).limit(limit).all()
     return automations
 
 
+"""Inicia uma automação"""
+
+
 @router.put("/automations/{automation_id}/start")
 async def start_automation(automation_id: int, db: Session = Depends(get_db)):
-    """Inicia uma automação"""
+
     automation = (
         db.query(AutomationModel).filter(AutomationModel.id == automation_id).first()
     )
@@ -64,9 +73,12 @@ async def start_automation(automation_id: int, db: Session = Depends(get_db)):
     return {"message": f"Automação {automation_id} iniciada com sucesso"}
 
 
+"""Para uma automação"""
+
+
 @router.put("/automations/{automation_id}/stop")
 async def stop_automation(automation_id: int, db: Session = Depends(get_db)):
-    """Para uma automação"""
+
     automation = (
         db.query(AutomationModel).filter(AutomationModel.id == automation_id).first()
     )

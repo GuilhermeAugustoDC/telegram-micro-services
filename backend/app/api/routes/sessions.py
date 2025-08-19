@@ -22,6 +22,8 @@ from app.api.dependencies import get_db
 
 router = APIRouter()
 
+"""Endpoint para fazer upload de um arquivo .session"""
+
 
 @router.post("/sessions/", response_model=SessionSchema)
 async def upload_session(
@@ -29,7 +31,7 @@ async def upload_session(
     session_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    """Endpoint para fazer upload de um arquivo .session"""
+
     if not session_file.filename.endswith(".session"):
         raise HTTPException(
             status_code=400, detail="O arquivo deve ter a extensão .session"
@@ -45,20 +47,26 @@ async def upload_session(
     db.add(db_session)
     db.commit()
     db.refresh(db_session)
-    
+
     return db_session
+
+
+"""Lista todas as sessões de usuário salvas."""
 
 
 @router.get("/sessions/", response_model=List[SessionSchema])
 async def list_sessions(db: Session = Depends(get_db)):
-    """Lista todas as sessões de usuário salvas."""
+
     sessions = db.query(UserSession).all()
     return sessions
 
 
+"""Faz o download de um arquivo de sessão."""
+
+
 @router.get("/sessions/download/{phone_number}")
 async def download_session(phone_number: str):
-    """Faz o download de um arquivo de sessão."""
+
     file_path = f"sessions/{phone_number}.session"
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Arquivo de sessão não encontrado")
@@ -67,6 +75,24 @@ async def download_session(phone_number: str):
         filename=f"{phone_number}.session",
         media_type="application/octet-stream",
     )
+
+
+"""Faz a remoção de um arquivo de sessão do DB e do Diretorio."""
+
+
+@router.delete("/sessions/{session_id}")
+async def delete_session(session_id: int, db: Session = Depends(get_db)):
+    # Remover do Banco De Dados
+    session = db.query(UserSession).filter(UserSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão não encontada")
+    session_file = f"sessions/{session.session_file}"
+    if not os.path.exists(session_file):
+        raise HTTPException(status_code=404, detail="Sessão não encontada no Diretorio")
+    os.remove(session_file)
+    db.delete(session)
+    db.commit()
+    return {"detail": "Sessão removida com sucesso"}
 
 
 @router.websocket("/ws/generate_session")
