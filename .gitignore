@@ -24,4 +24,6 @@ frontend/.vite/
 # Logs
 *.log
 
-#
+#Virtual Env
+venv/
+.venv/
