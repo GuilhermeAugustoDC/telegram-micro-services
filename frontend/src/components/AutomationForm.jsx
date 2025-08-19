@@ -4,6 +4,7 @@ const AutomationForm = ({ onAutomationCreated }) => {
 	const [automationName, setAutomationName] = useState('');
 	const [sourceChatId, setSourceChatId] = useState('');
 	const [destinationChatIds, setDestinationChatIds] = useState('');
+	const [sessionId, setSessionId] = useState(''); // Novo estado
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -22,6 +23,8 @@ const AutomationForm = ({ onAutomationCreated }) => {
 					name: automationName,
 					source_chat_id: sourceChatId,
 					destination_chat_ids: destinationIds,
+					destination_chats: destinationIds,
+					session_id: Number(sessionId),
 				}),
 			});
 
@@ -35,6 +38,7 @@ const AutomationForm = ({ onAutomationCreated }) => {
 			setSourceChatId('');
 			setDestinationChatIds('');
 			onAutomationCreated();
+			setSessionId('');
 			alert('Automação criada com sucesso!');
 		} catch (error) {
 			console.error(error);
