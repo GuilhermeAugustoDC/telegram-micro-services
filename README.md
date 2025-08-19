@@ -1,6 +1,6 @@
 # Telegram Micro Services - Automação de Mensagens
 
-Este é um projeto de automação para encaminhar mensagens entre grupos e canais do Telegram, construído com uma arquitetura moderna de microsserviços.
+Este é um projeto de automação para encaminhar mensagens entre grupos e canais do Telegram, construído com uma arquitetura moderna de micros serviços.
 
 ## 🚀 Arquitetura
 
