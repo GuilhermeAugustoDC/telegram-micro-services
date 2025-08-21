@@ -24,11 +24,19 @@ async def create_automation(
 
     db_automation = AutomationModel(
         name=automation.name,
-        source_chat_id=automation.source_chat_id,
         is_active=False,
         session_id=automation.session_id,
     )
 
+    # Adiciona canais de origem
+    for chat_id in automation.source_chats:
+        chat = db.query(Chat).filter(Chat.chat_id == chat_id).first()
+        if not chat:
+            chat = Chat(chat_id=chat_id)
+            db.add(chat)
+        db_automation.source_chats.append(chat)
+
+    # Adiciona canais de destino
     for chat_id in automation.destination_chats:
         chat = db.query(Chat).filter(Chat.chat_id == chat_id).first()
         if not chat:
@@ -40,7 +48,7 @@ async def create_automation(
     db.commit()
     db.refresh(db_automation)
 
-    return db_automation
+    return Automation.from_orm(db_automation)
 
 
 """Lista todas as automações"""
@@ -52,7 +60,7 @@ async def list_automations(
 ):
 
     automations = db.query(AutomationModel).offset(skip).limit(limit).all()
-    return automations
+    return [Automation.from_orm(automation) for automation in automations]
 
 
 """Inicia uma automação"""
@@ -89,3 +97,21 @@ async def stop_automation(automation_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": f"Automação {automation_id} parada com sucesso"}
+
+
+"""Remove uma automação"""
+
+
+@router.delete("/automations/{automation_id}")
+async def delete_automation(automation_id: int, db: Session = Depends(get_db)):
+
+    automation = (
+        db.query(AutomationModel).filter(AutomationModel.id == automation_id).first()
+    )
+    if not automation:
+        raise HTTPException(status_code=404, detail="Automação não encontrada")
+
+    db.delete(automation)
+    db.commit()
+
+    return {"message": f"Automação {automation_id} removida com sucesso"}

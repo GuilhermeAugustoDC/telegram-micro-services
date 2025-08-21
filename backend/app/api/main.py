@@ -1,16 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import os
 
 from app.models.database import create_tables
-from app.api.routes import automations, sessions
+from app.api.routes import automations, sessions, channels, logs
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Garante que o diretório de sessões existe
+    # Garante que os diretórios necessários existem
     os.makedirs("sessions", exist_ok=True)
-    # Cria as tabelas do banco de dados
+        # Cria as tabelas do banco de dados
     create_tables()
     print("Startup complete. Database tables created and sessions directory ensured.")
     yield
@@ -32,9 +33,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Garante que o diretório estático existe antes de montá-lo
+os.makedirs("app/static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 # Inclui os roteadores
 app.include_router(automations.router, prefix="/api", tags=["Automations"])
 app.include_router(sessions.router, prefix="/api", tags=["Sessions"])
+app.include_router(channels.router, prefix="/api", tags=["Channels"])
+app.include_router(logs.router, prefix="/api", tags=["Logs"])
 
 if __name__ == "__main__":
     import uvicorn

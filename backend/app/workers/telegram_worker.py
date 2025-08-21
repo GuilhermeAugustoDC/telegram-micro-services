@@ -3,7 +3,6 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message
 import logging
-from dotenv import load_dotenv
 
 from ..models.database import (
     SessionLocal,
@@ -19,8 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Carrega as variáveis de ambiente
-load_dotenv()
+# Sem dependência de .env para credenciais do Telegram; usar credenciais da sessão
 
 
 class TelegramWorker:
@@ -54,11 +52,23 @@ class TelegramWorker:
             return
 
         try:
+            # Usa credenciais da sessão armazenadas no banco
+            try:
+                api_id_value = int(str(session.api_id).strip()) if session.api_id else None
+                api_hash_value = str(session.api_hash).strip() if session.api_hash else None
+            except Exception:
+                api_id_value = None
+                api_hash_value = None
+
+            if not api_id_value or not api_hash_value:
+                logger.error("Credenciais da API ausentes/invalidas para a sessão. Recrie a sessão com API_ID/API_HASH.")
+                return
+
             # Cria o cliente Pyrogram
             client = Client(
                 name=session_path.replace(".session", ""),
-                api_id=os.getenv("API_ID"),
-                api_hash=os.getenv("API_HASH"),
+                api_id=api_id_value,
+                api_hash=api_hash_value,
             )
 
             # Adiciona os handlers de mensagem

@@ -1,4 +1,7 @@
+import { useNavigate } from 'react-router-dom';
+
 const SessionList = ({ sessions, onSessionDeleted }) => {
+	const navigate = useNavigate();
 	const handleDownload = (phoneNumber) => {
 		window.location.href = `/api/sessions/download/${phoneNumber}`;
 	};
@@ -39,7 +42,7 @@ const SessionList = ({ sessions, onSessionDeleted }) => {
 									{session.phone_number}
 								</td>
 								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2'>
-									<button
+																		<button
 										onClick={() => handleDownload(session.phone_number)}
 										className='text-blue-600 hover:text-blue-800'
 									>
@@ -47,7 +50,7 @@ const SessionList = ({ sessions, onSessionDeleted }) => {
 									</button>
 									<button
 										onClick={() => handleDelete(session.id)}
-										className='text-red-600 hover:text-red-800 ml-2'
+										className='text-red-600 hover:text-red-800'
 									>
 										Apagar
 									</button>

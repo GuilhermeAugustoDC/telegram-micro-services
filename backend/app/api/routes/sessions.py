@@ -15,6 +15,8 @@ from pyrogram import Client
 from pyrogram.errors import SessionPasswordNeeded, PhoneCodeInvalid, PhoneNumberInvalid
 import os
 import shutil
+import json
+from datetime import datetime
 
 from app.schemas.session import Session as SessionSchema
 from app.models.database import UserSession
@@ -96,7 +98,7 @@ async def delete_session(session_id: int, db: Session = Depends(get_db)):
 
 
 @router.websocket("/ws/generate_session")
-async def generate_session_ws(websocket: WebSocket):
+async def generate_session_ws(websocket: WebSocket, db: Session = Depends(get_db)):
     await websocket.accept()
     client = None
     try:
@@ -131,12 +133,29 @@ async def generate_session_ws(websocket: WebSocket):
                 await client.sign_in(
                     phone_number, sent_code.phone_code_hash, phone_code
                 )
-                await websocket.send_json(
-                    {
-                        "status": "success",
-                        "message": f"Sessão para {phone_number} criada com sucesso!",
-                    }
+                session_filename = f"{phone_number}.session"
+                session_data = UserSession(
+                    session_file=session_filename,
+                    phone_number=phone_number,
+                    api_id=api_id,
+                    api_hash=api_hash,
+                    created_at=datetime.utcnow()
                 )
+                db.add(session_data)
+                db.commit()
+                db.refresh(session_data)
+                
+                await websocket.send_text(json.dumps({
+                    "status": "success",
+                    "message": f"Sessão criada com sucesso! Arquivo: {session_filename}",
+                    "session_id": session_data.id,
+                    "session_data": {
+                        "id": session_data.id,
+                        "session_file": session_data.session_file,
+                        "phone_number": session_data.phone_number,
+                        "created_at": session_data.created_at.isoformat()
+                    }
+                }))
 
             except SessionPasswordNeeded:
                 await websocket.send_json(
@@ -148,12 +167,31 @@ async def generate_session_ws(websocket: WebSocket):
                 password_data = await websocket.receive_json()
                 password = password_data["value"]
                 await client.check_password(password)
-                await websocket.send_json(
-                    {
-                        "status": "success",
-                        "message": f"Sessão para {phone_number} criada com sucesso!",
-                    }
+                
+                # Salva no banco após autenticação com senha
+                session_filename = f"{phone_number}.session"
+                session_data = UserSession(
+                    session_file=session_filename,
+                    phone_number=phone_number,
+                    api_id=api_id,
+                    api_hash=api_hash,
+                    created_at=datetime.utcnow()
                 )
+                db.add(session_data)
+                db.commit()
+                db.refresh(session_data)
+                
+                await websocket.send_text(json.dumps({
+                    "status": "success",
+                    "message": f"Sessão criada com sucesso! Arquivo: {session_filename}",
+                    "session_id": session_data.id,
+                    "session_data": {
+                        "id": session_data.id,
+                        "session_file": session_data.session_file,
+                        "phone_number": session_data.phone_number,
+                        "created_at": session_data.created_at.isoformat()
+                    }
+                }))
 
             except (PhoneCodeInvalid, PhoneNumberInvalid) as e:
                 await websocket.send_json(
