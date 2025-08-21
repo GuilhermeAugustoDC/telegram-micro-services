@@ -1,4 +1,4 @@
-# Telegram MicroSaaS - Sistema de Automação de Mensagens
+# Telegram Micro Services - Sistema de Automação de Mensagens
 
 Sistema completo de automação para encaminhamento de mensagens entre canais e grupos do Telegram, com interface web moderna e funcionalidades avançadas de cache e logs.
 
