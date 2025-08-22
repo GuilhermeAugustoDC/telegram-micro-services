@@ -35,9 +35,7 @@ class TelegramWorker:
 
     async def load_sessions(self):
         """Carrega as sessões ativas do banco de dados"""
-        sessions = (
-            self.db.query(UserSession).filter(UserSession.is_active).all()
-        )
+        sessions = self.db.query(UserSession).filter(UserSession.is_active).all()
 
         for session in sessions:
             await self.start_client(session)
@@ -54,14 +52,20 @@ class TelegramWorker:
         try:
             # Usa credenciais da sessão armazenadas no banco
             try:
-                api_id_value = int(str(session.api_id).strip()) if session.api_id else None
-                api_hash_value = str(session.api_hash).strip() if session.api_hash else None
+                api_id_value = (
+                    int(str(session.api_id).strip()) if session.api_id else None
+                )
+                api_hash_value = (
+                    str(session.api_hash).strip() if session.api_hash else None
+                )
             except Exception:
                 api_id_value = None
                 api_hash_value = None
 
             if not api_id_value or not api_hash_value:
-                logger.error("Credenciais da API ausentes/invalidas para a sessão. Recrie a sessão com API_ID/API_HASH.")
+                logger.error(
+                    "Credenciais da API ausentes/invalidas para a sessão. Recrie a sessão com API_ID/API_HASH."
+                )
                 return
 
             # Cria o cliente Pyrogram
@@ -80,7 +84,9 @@ class TelegramWorker:
             logger.info(f"Cliente iniciado para a sessão: {session.phone_number}")
 
             # As automações são carregadas dinamicamente quando necessário
-            logger.info(f"Automações para a sessão {session.phone_number} serão carregadas sob demanda.")
+            logger.info(
+                f"Automações para a sessão {session.phone_number} serão carregadas sob demanda."
+            )
 
         except Exception as e:
             logger.error(
@@ -146,7 +152,6 @@ class TelegramWorker:
 
         except Exception as e:
             logger.error(f"Erro ao processar automação {automation.id}: {str(e)}")
-
 
     async def stop(self):
         """Para o worker e todos os clientes"""
