@@ -3,7 +3,7 @@ uvicorn[standard]
 sqlalchemy
 pyrogram
 python-multipart
-websockets==0.0.6
+websockets
 python-dotenv==1.0.0
 sqlalchemy==2.0.23
 pyrogram==2.0.106
